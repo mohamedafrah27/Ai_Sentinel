@@ -1,0 +1,35 @@
+{
+  "model_type": "RandomForestClassifier",
+  "n_estimators": 100,
+  "max_depth": 8,
+  "dataset_path": "urls_dataset.csv",
+  "total_samples": 211,
+  "train_samples": 168,
+  "test_samples": 43,
+  "features_used": 11,
+  "feature_names": [
+    "url_length",
+    "dot_count",
+    "has_ip_address",
+    "is_https",
+    "suspicious_keyword_count",
+    "has_at_symbol",
+    "domain_length",
+    "hyphen_count_domain",
+    "subdomain_count",
+    "has_double_slash_redirect",
+    "suspicious_tld"
+  ],
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
+  },
+  "confusion_matrix": {
+    "true_negatives": 21,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "true_positives": 22
+  }
+}

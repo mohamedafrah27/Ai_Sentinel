@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Sentinel — Security Operations Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Chart.js CDN for interactive threat statistics visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- Top Navigation Header -->
+    <header class="top-nav">
+      <div class="brand-group">
+        <div class="shield-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">AI SENTINEL</h1>
+          <span class="brand-subtitle">CYBERSECURITY INTELLIGENCE DASHBOARD</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live Connection Pill -->
+        <div id="backend-status-pill" class="status-pill status-checking">
+          <span class="status-dot"></span>
+          <span id="backend-status-text">Checking Backend</span>
+        </div>
+
+        <!-- Auto-Refresh Control -->
+        <div class="refresh-control">
+          <label class="auto-refresh-label">
+            <input type="checkbox" id="auto-refresh-toggle" checked>
+            <span>Auto-Refresh (15s)</span>
+          </label>
+          <button id="manual-refresh-btn" class="btn btn-secondary" title="Fetch latest scan statistics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="dashboard-main">
+      <!-- Quick URL Scan Bar -->
+      <section class="quick-scanner-card">
+        <div class="scanner-header">
+          <span class="scanner-title">🔍 REAL-TIME THREAT SCANNER</span>
+          <span class="scanner-subtext">Scan any URL to observe instant database synchronization and telemetry visualization</span>
+        </div>
+        <form id="quick-scan-form" class="scanner-form">
+          <input
+            type="text"
+            id="quick-scan-input"
+            class="scanner-input"
+            placeholder="Enter target URL (e.g. https://www.google.com or simulated phishing URL)..."
+            required
+          />
+          <button type="submit" id="quick-scan-btn" class="btn btn-primary">
+            <span>Analyze URL</span>
+          </button>
+        </form>
+        <div id="quick-scan-result" class="quick-scan-feedback hidden"></div>
+      </section>
+
+      <!-- Key Performance Metrics Cards -->
+      <section class="stats-grid">
+        <!-- 1. Total Scanned -->
+        <div class="stat-card">
+          <div class="stat-icon-wrap icon-total">🌐</div>
+          <div class="stat-body">
+            <span class="stat-label">TOTAL WEBSITES SCANNED</span>
+            <div class="stat-value" id="stat-total-scans">--</div>
+            <span class="stat-foot">Real-time database records</span>
+          </div>
+        </div>
+
+        <!-- 2. Safe Sites Count -->
+        <div class="stat-card stat-safe">
+          <div class="stat-icon-wrap icon-safe">🛡️</div>
+          <div class="stat-body">
+            <span class="stat-label">SAFE WEBSITES</span>
+            <div class="stat-value text-safe" id="stat-safe-scans">--</div>
+            <span class="stat-foot" id="stat-safe-sub">Low Risk (0–30)</span>
+          </div>
+        </div>
+
+        <!-- 3. Suspicious Sites Count -->
+        <div class="stat-card stat-suspicious">
+          <div class="stat-icon-wrap icon-suspicious">⚠️</div>
+          <div class="stat-body">
+            <span class="stat-label">SUSPICIOUS WEBSITES</span>
+            <div class="stat-value text-suspicious" id="stat-suspicious-scans">--</div>
+            <span class="stat-foot" id="stat-suspicious-sub">Medium Risk (31–60)</span>
+          </div>
+        </div>
+
+        <!-- 4. Malicious Sites Count -->
+        <div class="stat-card stat-malicious">
+          <div class="stat-icon-wrap icon-malicious">🚨</div>
+          <div class="stat-body">
+            <span class="stat-label">MALICIOUS WEBSITES</span>
+            <div class="stat-value text-malicious" id="stat-malicious-scans">--</div>
+            <span class="stat-foot" id="stat-malicious-sub">High Risk (61–100)</span>
+          </div>
+        </div>
+
+        <!-- 5. Threat Detection Percentage -->
+        <div class="stat-card stat-threat">
+          <div class="stat-icon-wrap icon-threat">📊</div>
+          <div class="stat-body">
+            <span class="stat-label">THREAT DETECTION RATE</span>
+            <div class="stat-value text-accent" id="stat-threat-rate">--%</div>
+            <div class="stat-progress-bar">
+              <div id="stat-threat-bar" class="stat-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Threat Statistics & Visualization Charts -->
+      <section class="charts-section">
+        <!-- Chart 1: Safe vs Suspicious vs Malicious Distribution -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title-wrap">
+              <span class="chart-title">SAFETY CLASSIFICATION RATIO</span>
+              <span class="chart-caption">Safe (Green) vs Suspicious (Yellow) vs Malicious (Red)</span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="categoryDoughnutChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Daily Website Scans -->
+        <div class="chart-card chart-card-wide">
+          <div class="chart-header">
+            <div class="chart-title-wrap">
+              <span class="chart-title">DAILY WEBSITE SCANS TIMELINE</span>
+              <span class="chart-caption">Cumulative daily scan activity by threat severity</span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="dailyScansBarChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Threat Score Distribution -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title-wrap">
+              <span class="chart-title">RISK SCORE BRACKETS</span>
+              <span class="chart-caption">Frequency distribution of AI risk scores (0–100)</span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="riskDistributionChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scan History Table Section -->
+      <section class="history-section">
+        <div class="history-header">
+          <div class="history-title-wrap">
+            <h2 class="section-title">REAL-TIME SCAN AUDIT LOG</h2>
+            <span class="section-subtitle">Chronological record of processed URL scans with ML scores and RAG intelligence</span>
+          </div>
+          <div class="history-filter-bar">
+            <input
+              type="text"
+              id="history-search-input"
+              class="history-search"
+              placeholder="Search by URL, category or indicators..."
+            />
+            <select id="history-status-filter" class="history-select">
+              <option value="ALL">All Categories</option>
+              <option value="Safe">Low Risk (Safe)</option>
+              <option value="Suspicious">Medium Risk (Suspicious)</option>
+              <option value="Malicious">High Risk (Malicious)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>STATUS</th>
+                <th>WEBSITE URL</th>
+                <th>RISK SCORE</th>
+                <th>THREAT EXPLANATION &amp; RAG INTELLIGENCE</th>
+                <th>TIMESTAMP</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <tr>
+                <td colspan="5" class="table-loading">Loading scan history records...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+      <div class="footer-left">
+        <span>AI Sentinel Defense System v1.0</span>
+        <span class="footer-divider">•</span>
+        <span>Random Forest Classifier</span>
+        <span class="footer-divider">•</span>
+        <span>RAG Vector DB</span>
+        <span class="footer-divider">•</span>
+        <span>Google Safe Browsing</span>
+      </div>
+      <div class="footer-right">
+        <span>SQLite Telemetry Database: <code>backend/sentinel.db</code></span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
